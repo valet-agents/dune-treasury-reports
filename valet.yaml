@@ -1,0 +1,75 @@
+name: dune-treasury-reports
+display_name: Dune Treasury Reports
+description: >-
+  Watches a configured set of treasury wallets and posts a
+  pre-market-open recap every weekday at 6:30am Eastern — balances,
+  24h P&L, notable transactions, and any unusual outflows — to
+  whichever Slack channel the bot has been invited to. Answers
+  on-chain questions about the wallets in Slack on @mention.
+category: finance
+
+story:
+  hero: "Your treasury, watched all night, recapped before market open."
+  subheadline: >-
+    Every morning it checks balances, P&L, and any movement that
+    looks unusual — and posts a clean recap before market open.
+  steps:
+    - role: trigger
+      title: "6:30am ET hits, before market open."
+      body: >-
+        The cron fires Monday through Friday. No dashboards to
+        refresh, no one to nudge.
+    - role: action
+      title: "It queries every watched wallet."
+      body: >-
+        Pulls balances, 24h P&L, and the last day of transactions
+        for each wallet, and flags anything unusual.
+      catalog: dune-mcp
+    - role: outcome
+      title: "A clean recap posted in Slack."
+      body: >-
+        Per-wallet balances, P&L, and an unusual-txs section,
+        every figure linked back to the Dune query. @mention it
+        back to dig into anything.
+      catalog: slack
+
+connectors:
+  - catalog: dune-mcp
+    description: >-
+      The Dune MCP server. The agent uses it to query wallet
+      balances, transaction history, and 24h P&L for every address
+      in the WALLETS env var, and to answer free-form on-chain
+      questions in Slack via SQL. Read-only.
+    slot_descriptions:
+      DUNE_API_KEY: >-
+        Your Dune API key. Get one at dune.com → Settings → API
+        Keys → "Create new API key". A free-tier key works for
+        the morning recap; heavier ad-hoc Q&A may benefit from a
+        paid plan with higher SQL credits.
+    ui:
+      headline: "Connect Dune."
+      blurb: >-
+        Paste your Dune API key. The agent uses it to query every
+        watched wallet's balances, P&L, and transactions, and to
+        answer on-chain questions in Slack.
+      done_note: "Dune connected"
+
+channels:
+  - catalog: slack
+    description: >-
+      The agent gets its own Slack bot. Invite it to whichever
+      channels you want the morning recap in, and to any other
+      channel where teammates should be able to @mention it for
+      ad-hoc on-chain questions about the watched wallets.
+    ui:
+      headline: "Give Treasury Reports a Slack bot."
+      blurb: >-
+        The agent posts the 6:30am ET recap to every channel you
+        invite it to. Invite it to one focused channel, or
+        several — whatever matches how your team works.
+      done_note: "Bot ready — invite it to a channel"
+
+  - type: cron
+    cron: "30 6 * * 1-5"
+    timezone: America/New_York
+    description: "Fires the morning treasury recap at 6:30am Eastern, Monday through Friday — before US market open."
