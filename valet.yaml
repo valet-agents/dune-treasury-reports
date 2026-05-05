@@ -8,6 +8,9 @@ description: >-
   on-chain questions about the wallets in Slack on @mention.
 category: finance
 
+example:
+  prompt: "What moved on the multi-sig today?"
+
 story:
   hero: "Your treasury, watched all night, recapped before market open."
   subheadline: >-
